@@ -31,7 +31,7 @@ class Pokemon:
             other.current_health -= self.attack * self.boost_attack
         elif attack_name == "Croissance":
             self.boost_attack = self.boost_attack * 1.5
-        elif attack_name == "Pistolet a O" or attack_name == "Hydroblast" or attack_name == "Tranch'Herbe":
+        elif attack_name == "Pistolet a O" or attack_name == "Flammeche" or attack_name == "Tranch'Herbe":
             if self.type == "Feu" and other.type == "Plante":
                 other.current_health -= self.attack * self.boost_attack * 1.5
             elif self.type == "Eau" and other.type == "Feu":
@@ -44,6 +44,7 @@ class Pokemon:
         self.boost_attack = 1
 
 def stepone(pokemon_name: str, pokemons: List[Pokemon]) -> None:
+    pokemons.clear()
     if pokemon_name == "unknown":
         print("Vous avez rentré un index de pokemon inconnu")
         return
