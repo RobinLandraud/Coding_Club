@@ -48,7 +48,8 @@ def make_attack(pokemon: Pokemon, other: Pokemon, attack_name: str) -> None:
     if attack_name == "Charge":
         other.current_health -= pokemon.attack * pokemon.boost_attack
     elif attack_name == "Croissance":
-        pokemon.boost_attack = pokemon.boost_attack * 1.5
+        pokemon.boost_attack = pokemon.boost_attack * 1.3
+        print(f"{pokemon.name} a maintenant un boost de {pokemon.boost_attack}")
     elif (
         attack_name == "Pistolet a O"
         or attack_name == "Flammeche"
@@ -56,12 +57,18 @@ def make_attack(pokemon: Pokemon, other: Pokemon, attack_name: str) -> None:
     ):
         if pokemon.type == "Feu" and other.type == "Plante":
             other.current_health -= pokemon.attack * pokemon.boost_attack * 1.5
+            print(f"{pokemon.name} à infligé {pokemon.attack * pokemon.boost_attack * 1.5} dégats à {other.name}")
         elif pokemon.type == "Eau" and other.type == "Feu":
             other.current_health -= pokemon.attack * pokemon.boost_attack * 1.5
+            print(f"{pokemon.name} à infligé {pokemon.attack * pokemon.boost_attack * 1.5} dégats à {other.name}")
         elif pokemon.type == "Plante" and other.type == "Eau":
             other.current_health -= pokemon.attack * pokemon.boost_attack * 1.5
+            print(f"{pokemon.name} à infligé {pokemon.attack * pokemon.boost_attack * 1.5} dégats à {other.name}")
         else:
             other.current_health -= pokemon.attack * pokemon.boost_attack
+            print(f"{pokemon.name} à infligé {pokemon.attack * pokemon.boost_attack} dégats à {other.name}")
+    if other.current_health < 0:
+        other.current_health = 0
 
 
 class Sac:
@@ -241,19 +248,40 @@ def stepthree(dresseur: Dresseur, dresseur_actions) -> int:
                 print(f"-----------------|  FIN  |-----------------")
                 return 2
         elif action == "None":
-            print(f"Mauvias choix !")
+            print(f"Mauvais choix !")
             continue
         opponent_attack: str = opponent.attacks[randint(0, 2)]
         print(f"{opponent.name} sauvage utilise {opponent_attack}")
-        print(f"{type(opponent)}, {type(dresseur.current_pokemon)}, {type(opponent_attack)}")
         make_attack(opponent, dresseur.current_pokemon, opponent_attack)
-
-        #attack(opponent, dresseur.current_pokemon, opponent.attacks[attack_index])
-        #if dresseur.current_pokemon.current_health <= 0:
-        #    print(f"Votre {dresseur.current_pokemon.name} est KO !")
-        #    print(f"Vous avez perdu face au {opponent.name} sauvage")
-        #    print(f"-----------------|  FIN  |-----------------")
-        #    return 2
-        #tour += 1
-        #print(f"-----------------|  FIN  |-----------------")
+        print(f"| {dresseur.current_pokemon.name} | : {dresseur.current_pokemon.current_health} PV")
+        print(f"| {opponent.name} | : {opponent.current_health} PV")
+        if dresseur.current_pokemon.current_health <= 0:
+            print(f"Votre {dresseur.current_pokemon.name} est KO !")
+            print(f"Vous avez perdu face au {opponent.name} sauvage")
+            print(f"-----------------|  FIN  |-----------------")
+            return 2
+        tour += 1
+        print(f"-----------------|  FIN  |-----------------")
     return 0
+
+
+def stepfour(path):
+    print(f"OUTPUT:\n{path}")
+    res = [
+        'bas', 'droite', 'droite', 'droite',
+        'bas', 'bas', 'droite', 'droite',
+        'droite', 'haut', 'haut', 'droite',
+        'droite', 'bas', 'bas', 'droite',
+        'bas', 'bas', 'gauche', 'bas',
+        'bas', 'bas', 'gauche', 'gauche',
+        'bas', 'gauche', 'gauche', 'haut',
+        'haut', 'gauche', 'gauche', 'bas',
+        'gauche', 'gauche', 'haut', 'haut',
+        'haut', 'droite', 'droite', 'droite',
+        'droite', 'droite'
+    ]
+    if path == res:
+        print("Step 4: Pass\n")
+        print("Vous avez réussi à vous rendre à la ville de Pallet !")
+    else:
+        print("Vous vous éloignez beaucoup trop de la route, vous décidé de revenir sur vos pas.")
