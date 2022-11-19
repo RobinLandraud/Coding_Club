@@ -6,15 +6,15 @@ from random import choice, randint
 class Pokemon:
     def __init__(
         self,
-        name,
-        type,
-        level=1,
-        max_health=100,
-        current_health=100,
-        attack=10,
-        boost_attack=1,
-        boost_multiplier=2.2,
-        type_multiplier=1.5,
+        name: str,
+        type: str,
+        level: int = 1,
+        max_health: int = 100,
+        current_health: int = 100,
+        attack: int = 10,
+        boost_attack: int =1,
+        boost_multiplier: float = 2.2,
+        type_multiplier: float = 1.5
     ):
         self.name = name
         self.level = level
@@ -23,7 +23,7 @@ class Pokemon:
         self.current_health = current_health
         self.attack = attack
         self.boost_attack = boost_attack
-        self.attacks = ["Charge", "Croissance"]
+        self.attacks: List[str] = ["Charge", "Croissance"]
         if type == "Feu":
             self.attacks.append("Flammeche")
         elif type == "Eau":
@@ -32,6 +32,8 @@ class Pokemon:
             self.attacks.append("Tranch'Herbe")
         else:
             self.attacks.append("Special")
+        while len(self.attacks) < 4:
+            self.attacks.append("None")
 
     def level_up(self):
         self.level += 1
@@ -39,27 +41,27 @@ class Pokemon:
         self.current_health = self.max_health
         self.attack = self.attack * 1.2
 
-    def attack(self, other, attack_name):
-        if attack_name == "Charge":
-            other.current_health -= self.attack * self.boost_attack
-        elif attack_name == "Croissance":
-            self.boost_attack = self.boost_attack * 1.5
-        elif (
-            attack_name == "Pistolet a O"
-            or attack_name == "Flammeche"
-            or attack_name == "Tranch'Herbe"
-        ):
-            if self.type == "Feu" and other.type == "Plante":
-                other.current_health -= self.attack * self.boost_attack * 1.5
-            elif self.type == "Eau" and other.type == "Feu":
-                other.current_health -= self.attack * self.boost_attack * 1.5
-            elif self.type == "Plante" and other.type == "Eau":
-                other.current_health -= self.attack * self.boost_attack * 1.5
-            else:
-                other.current_health -= self.attack * self.boost_attack
-
     def reset_boost(self):
         self.boost_attack = 1
+
+def make_attack(pokemon: Pokemon, other: Pokemon, attack_name: str) -> None:
+    if attack_name == "Charge":
+        other.current_health -= pokemon.attack * pokemon.boost_attack
+    elif attack_name == "Croissance":
+        pokemon.boost_attack = pokemon.boost_attack * 1.5
+    elif (
+        attack_name == "Pistolet a O"
+        or attack_name == "Flammeche"
+        or attack_name == "Tranch'Herbe"
+    ):
+        if pokemon.type == "Feu" and other.type == "Plante":
+            other.current_health -= pokemon.attack * pokemon.boost_attack * 1.5
+        elif pokemon.type == "Eau" and other.type == "Feu":
+            other.current_health -= pokemon.attack * pokemon.boost_attack * 1.5
+        elif pokemon.type == "Plante" and other.type == "Eau":
+            other.current_health -= pokemon.attack * pokemon.boost_attack * 1.5
+        else:
+            other.current_health -= pokemon.attack * pokemon.boost_attack
 
 
 class Sac:
@@ -190,13 +192,23 @@ def stepthree(dresseur: Dresseur, dresseur_actions) -> int:
         print("2. potion")
         print("3. pokeball")
         print("4. inventaire")
-        print("5. attaquer:attaque")
+        i = 5
+        for attack in dresseur.current_pokemon.attacks:
+            print(f"{i}: {attack}")
+            i += 1
         print(f"-----------------|Tour: {tour}|-----------------")
-        action = dresseur_actions(input())
+        index_str = input("Entrez le numéro de l'action que vous voulez faire: ")
+        action: str = dresseur_actions(index_str)
         if action == "changer":
-            print(f"Vous ne pouvez pas changer de pokemon pour le moment")
+            i = 1
+            for pokemon in dresseur.pokemons:
+                if pokemon.current_health > 0 and pokemon != dresseur.current_pokemon:
+                    print(f"{i}: {pokemon.name}")
+                    i += 1
+            if i == 1:
+                print("Vous ne pouvez pas changer de pokemon !")
             print(f"-----------------|  FIN  |-----------------")
-            continue
+            tour += 1
         elif action == "potion":
             dresseur.heal_pokemon()
             print(f"Vous avez utilisé une potion")
@@ -205,22 +217,19 @@ def stepthree(dresseur: Dresseur, dresseur_actions) -> int:
             )
             print(f"-----------------|  FIN  |-----------------")
             tour += 1
-            continue
         elif action == "pokeball":
             dresseur.catch_pokemon(opponent)
             if opponent in dresseur.pokemons:
                 print(f"-----------------|  FIN  |-----------------")
                 return 0
             print(f"-----------------|  FIN  |-----------------")
+            tour += 1
         elif action == "inventaire":
             dresseur.sac.show_inventory()
             print(f"-----------------|  FIN  |-----------------")
-            tour += 1
-            continue
-        elif "Attaque:" in action:
-            attack = action.split(":")[1]
-            print(f"{dresseur.current_pokemon.name} utilise {attack}")
-            dresseur.current_pokemon.attack(opponent, attack)
+        elif action is not None:
+            print(f"{dresseur.current_pokemon.name} utilise {action}")
+            make_attack(dresseur.current_pokemon, opponent, action)
             if opponent.current_health <= 0:
                 print(f"Le {opponent.name} sauvage est KO !")
                 print(f"Vous avez échoué à capturer le {opponent.name} sauvage")
@@ -232,15 +241,19 @@ def stepthree(dresseur: Dresseur, dresseur_actions) -> int:
                 print(f"-----------------|  FIN  |-----------------")
                 return 2
         elif action == "None":
-            print(f"-----------------|  FIN  |-----------------")
+            print(f"Mauvias choix !")
             continue
-        print(f"{opponent.name} sauvage utilise {opponent.attacks[randint(0, 2)]}")
-        opponent.attack(dresseur.current_pokemon, opponent.attacks[randint(0, 2)])
-        if dresseur.current_pokemon.current_health <= 0:
-            print(f"Votre {dresseur.current_pokemon.name} est KO !")
-            print(f"Vous avez perdu face au {opponent.name} sauvage")
-            print(f"-----------------|  FIN  |-----------------")
-            return 2
-        tour += 1
-        print(f"-----------------|  FIN  |-----------------")
+        opponent_attack: str = opponent.attacks[randint(0, 2)]
+        print(f"{opponent.name} sauvage utilise {opponent_attack}")
+        print(f"{type(opponent)}, {type(dresseur.current_pokemon)}, {type(opponent_attack)}")
+        make_attack(opponent, dresseur.current_pokemon, opponent_attack)
+
+        #attack(opponent, dresseur.current_pokemon, opponent.attacks[attack_index])
+        #if dresseur.current_pokemon.current_health <= 0:
+        #    print(f"Votre {dresseur.current_pokemon.name} est KO !")
+        #    print(f"Vous avez perdu face au {opponent.name} sauvage")
+        #    print(f"-----------------|  FIN  |-----------------")
+        #    return 2
+        #tour += 1
+        #print(f"-----------------|  FIN  |-----------------")
     return 0
