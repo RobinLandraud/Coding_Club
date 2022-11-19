@@ -177,7 +177,9 @@ def stepthree(dresseur: Dresseur, dresseur_actions) -> int:
     heliatron = Pokemon("Heliatron", "Plante")
     Aquali = Pokemon("Aquali", "Eau")
     Caninos = Pokemon("Caninos", "Feu")
-    opponent = choice([heliatron, Aquali, Caninos])
+    listOpponents = [heliatron, Aquali, Caninos]
+    opponent = listOpponents[randint(0, 2)]
+    print(opponent.attacks[0])
     tour = 1
 
     print(f"Vous avez rencontré un {opponent.name} sauvage !")
@@ -232,8 +234,8 @@ def stepthree(dresseur: Dresseur, dresseur_actions) -> int:
         elif action == "None":
             print(f"-----------------|  FIN  |-----------------")
             continue
-        opponent_attack = choice(opponent.attacks)
-        opponent.attack(dresseur.current_pokemon, opponent_attack)
+        print(f"{opponent.name} sauvage utilise {opponent.attacks[randint(0, 2)]}")
+        opponent.attack(dresseur.current_pokemon, opponent.attacks[randint(0, 2)])
         if dresseur.current_pokemon.current_health <= 0:
             print(f"Votre {dresseur.current_pokemon.name} est KO !")
             print(f"Vous avez perdu face au {opponent.name} sauvage")
